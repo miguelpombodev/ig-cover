@@ -1,5 +1,6 @@
-import { Schema, model, Document } from 'mongoose';
-import { hash } from 'bcryptjs';
+import { Schema, model } from 'mongoose';
+import { hash, compare } from 'bcryptjs';
+import jwt from 'jsonwebtoken'
 
 import IUserSchemaProps from '../interfaces/IUserSchema'
 
@@ -8,7 +9,7 @@ const userSchema: Schema = new Schema({
     type: String,
     required: true
   },
-  nickname: {
+  username: {
     type: String,
     required: true
   },
@@ -29,14 +30,33 @@ const userSchema: Schema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   }],
+  posts: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Posts'
+  }],
 }, {
   timestamps: true,
 });
 
 userSchema.pre<IUserSchemaProps>('save', async function (next) {
-  if (this.isModified(this.password)) {
+  if (!this.isModified(this.password)) {
     this.password = await hash(this.password, 8);
   }
+
+  next();
 })
+
+userSchema.methods = {
+  generateToken(): string {
+    return jwt.sign({ id: this.id }, 'SECRETPAY', {
+      expiresIn: '1d'
+    })
+  },
+
+  compareHash(password: string): Promise<Boolean> {
+    return compare(password, this.password)
+  }
+}
+
 
 export default model<IUserSchemaProps>('User', userSchema);

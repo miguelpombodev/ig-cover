@@ -1,15 +1,9 @@
 import { Router } from 'express';
+import UserController from '../controllers/UserController';
 
 const userRouter = Router();
+const userController = new UserController();
 
-import User from '../entities/User'
-
-userRouter.post('/', async (request, response) => {
-  const body = request.body;
-
-  const newUser = await User.create(body)
-
-  return response.json(newUser)
-});
+userRouter.post('/', userController.create);
 
 export default userRouter;

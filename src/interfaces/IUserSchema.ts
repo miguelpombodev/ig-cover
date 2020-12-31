@@ -8,6 +8,9 @@ interface IUserSchemaProps extends Document {
   avatar: string,
   following: [string],
   followers: [string],
+  posts: [string],
+  generateToken(): string,
+  compareHash(password: string): boolean,
 }
 
 export default IUserSchemaProps
